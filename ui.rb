@@ -1,32 +1,40 @@
 require 'readline'
 
+# TODO: filenames with spaces aren't supported yet and should be
 class UI
+  @cmd_list = {
+    /help/ => :help,
+    /show chunks/ => :show_chunks,
+    /extract (\S+) (\S+) ?(\S*)/ => :extract_chunk
+  }
+
   def self.Launch(pngfile)
     puts "\nType 'help' for list of supported commands."
 
-    while input = Readline.readline("> ", true)
+    while input = Readline.readline("\n> ", true)
       break if input == "exit"
       process_command pngfile, input
     end
   end
 
-  # TODO: filenames with spaces aren't supported yet and should be
   def self.process_command(pngfile, input)
-    input_args = input.split(/\s+/)
-    case input_args[0]
-      when "help"
-        puts "extract chunk_type file [whole-chunk] - Extract one chunk into a separate file."
-      when "extract"
-        type = input_args[1]
-        filename = input_args[2]
-        extract_what = input_args[3] or "data-only"
-        extract_chunk pngfile, type, filename, extract_what
-      when "show"
-        case input_args[1]
-          when "chunks"
-            show_chunks pngfile
-        end
+    @cmd_list.each do |re, cmd|
+      if(matches = re.match(input)) then
+        args = re.match(input).to_a
+        # get rid of 0 (full matched string) as functions don't need it
+        args.shift
+        # call the required command, passing the regex matches as arguments
+        self.send cmd, pngfile, *args
+        return
+      end
     end
+    puts "Command not recognised."
+  end
+
+  def self.help(pngfile)
+    puts "exit - Exit pngplayground."
+    puts "show chunks - List all chunks and high-level stats."
+    puts "extract chunk_type file [whole-chunk] - Extract one chunk into a separate file."
   end
 
   def self.extract_chunk(pngfile, type, filename, extract_what)
