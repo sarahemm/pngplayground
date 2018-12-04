@@ -1,0 +1,20 @@
+#!/usr/bin/ruby
+
+require './helpers.rb'
+require './pngformat.rb'
+require './ui.rb'
+
+if(!ARGV[0]) then
+  puts "usage: #{$0} pngfile"
+  Kernel.exit 1
+end
+if(!File.exist? ARGV[0]) then
+  puts "File '#{ARGV[0]}' not found."
+  Kernel.exit 2
+end
+pngfile = File.open(ARGV[0], "r")
+png = PngFile.new(pngfile)
+pngfile.close
+png.header.validate
+
+UI::Launch png
