@@ -64,5 +64,17 @@ class PngChunk
   def crc_ok?
     actual_crc == @crc
   end
+
+  def is_critical?
+    @type[0].is_upper?
+  end
+
+  def is_public?
+    @type[1].is_upper?
+  end
+
+  def is_copysafe?
+    @type[3].is_upper?
+  end
 end
 

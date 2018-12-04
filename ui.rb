@@ -2,17 +2,19 @@ require 'readline'
 require 'zlib'
 
 # TODO: filenames with spaces aren't supported yet and should be
+# TODO: support multiple chunks of one type
 class UI
   @cmd_list = {
     /help/ => :help,
     /show chunks/ => :show_chunks,
+    /show chunk (\S+)/ => :show_chunk,
     /extract (\S+) (\S+) ?(\S*)/ => :extract_chunk
   }
 
   def self.Launch(pngfile)
     puts "\nType 'help' for list of supported commands."
 
-    while input = Readline.readline("\n> ", true)
+    while input = Readline.readline("\npngplayground> ", true)
       break if input == "exit"
       process_command pngfile, input
     end
@@ -35,13 +37,13 @@ class UI
   def self.help(pngfile)
     puts "exit - Exit pngplayground."
     puts "show chunks - List all chunks and high-level stats."
+    puts "show chunk chunk_type - Show detailed info about a chunk."
     puts "extract chunk_type file [whole-chunk] - Extract one chunk into a separate file."
   end
 
   def self.extract_chunk(pngfile, type, filename, extract_what)
     # TODO: make sure file doesn't exist first
     chunks = pngfile.chunk(type)
-    # TODO: support selecting a chunk to extract if there's >1 of a type
     if(chunks.length > 1) then
       puts "Extracting chunks where more than one instance exists is not yet supported."
       return
@@ -60,5 +62,24 @@ class UI
     pngfile.chunks.each do |chunk|
       puts "#{chunk.type} - #{chunk.data.length} bytes - #{chunk.crc_ok? ? 'CRC OK' : 'CRC FAIL'}"
     end
+  end
+
+  def self.show_chunk(pngfile, type)
+    # TODO: should be extended with chunk-specific info in an extensible way
+    chunks = pngfile.chunk(type)
+    if(chunks.length == 0) then
+      puts "No #{type} chunks found."
+      return
+    end
+    chunk = chunks[0]
+    flags = Array.new
+    flags.push "Critical" if chunk.is_critical?
+    flags.push chunk.is_public? ? "Public" : "Private"
+    flags.push "Copy-safe" if chunk.is_copysafe?
+    puts "Type: #{chunk.type}"
+    puts "Size: #{chunk.data.length}"
+    puts "Flags: #{flags.join(", ")}"
+    puts "Stored CRC: #{sprintf "0x%08X", chunk.crc} (#{chunk.crc_ok? ? "OK" : "Bad"})"
+    puts "Actual CRC: #{sprintf "0x%08X", chunk.actual_crc}"
   end
 end
