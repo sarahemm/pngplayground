@@ -1,3 +1,5 @@
+require 'zlib'
+
 class PngFile
   attr_accessor :header, :chunks
 
@@ -7,8 +9,12 @@ class PngFile
     @chunks = Array.new
     print "Reading chunks: "
     while(@chunks.push PngChunk.new(pngfile))
-      print "#{@chunks[chunks.length-1].type}, "
-      break if @chunks[chunks.length-1].type == "IEND"
+      this_chunk = @chunks[chunks.length-1]
+      crc_bad_flag = ""
+      crc_bad_flag = " (CRC bad)" if !this_chunk.crc_ok?
+      print "#{this_chunk.type}#{crc_bad_flag}, "
+      # TODO: support trailer data after IEND
+      break if this_chunk.type == "IEND"
     end
     puts "done."
   end
@@ -48,7 +54,15 @@ class PngChunk
     length = pngfile.read(4).unpack("N")[0]
     @type = pngfile.read(4)
     @data = pngfile.read(length)
-    @crc = pngfile.read(4)
+    @crc = pngfile.read(4).to_s.unpack("N")[0]
+  end
+
+  def actual_crc
+    Zlib::crc32 @type + @data
+  end
+
+  def crc_ok?
+    actual_crc == @crc
   end
 end
 

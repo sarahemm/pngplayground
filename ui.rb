@@ -1,4 +1,5 @@
 require 'readline'
+require 'zlib'
 
 # TODO: filenames with spaces aren't supported yet and should be
 class UI
@@ -57,7 +58,7 @@ class UI
 
   def self.show_chunks(pngfile)
     pngfile.chunks.each do |chunk|
-      puts "#{chunk.type} - #{chunk.data.length} bytes"
+      puts "#{chunk.type} - #{chunk.data.length} bytes - #{chunk.crc_ok? ? 'CRC OK' : 'CRC FAIL'}"
     end
   end
 end
