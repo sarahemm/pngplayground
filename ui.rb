@@ -65,21 +65,12 @@ class UI
   end
 
   def self.show_chunk(pngfile, type)
-    # TODO: should be extended with chunk-specific info in an extensible way
     chunks = pngfile.chunk(type)
     if(chunks.length == 0) then
       puts "No #{type} chunks found."
       return
     end
     chunk = chunks[0]
-    flags = Array.new
-    flags.push "Critical" if chunk.is_critical?
-    flags.push chunk.is_public? ? "Public" : "Private"
-    flags.push "Copy-safe" if chunk.is_copysafe?
-    puts "Type: #{chunk.type}"
-    puts "Size: #{chunk.data.length}"
-    puts "Flags: #{flags.join(", ")}"
-    puts "Stored CRC: #{sprintf "0x%08X", chunk.crc} (#{chunk.crc_ok? ? "OK" : "Bad"})"
-    puts "Actual CRC: #{sprintf "0x%08X", chunk.actual_crc}"
+    print chunk.info
   end
 end

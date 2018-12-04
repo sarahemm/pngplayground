@@ -1,6 +1,7 @@
 #!/usr/bin/ruby
 
 require './helpers.rb'
+require './chunk.rb'
 require './pngformat.rb'
 require './ui.rb'
 

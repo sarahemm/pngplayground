@@ -47,34 +47,3 @@ class PngFileHeader
   end
 end
 
-class PngChunk
-  attr_reader :type, :data, :crc
-
-  def initialize(pngfile)
-    length = pngfile.read(4).unpack("N")[0]
-    @type = pngfile.read(4)
-    @data = pngfile.read(length)
-    @crc = pngfile.read(4).to_s.unpack("N")[0]
-  end
-
-  def actual_crc
-    Zlib::crc32 @type + @data
-  end
-
-  def crc_ok?
-    actual_crc == @crc
-  end
-
-  def is_critical?
-    @type[0].is_upper?
-  end
-
-  def is_public?
-    @type[1].is_upper?
-  end
-
-  def is_copysafe?
-    @type[3].is_upper?
-  end
-end
-
