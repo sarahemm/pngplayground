@@ -1,0 +1,7 @@
+#!/bin/bash
+
+# Get the corrupt images from the png suite
+for FILE in xc1n0g08 xc9n2c08 xcrn0g04 xcsn0g01 xd0n2c08 xd3n2c08 xd9n2c08 xdtn0g01 xhdn0g08 xlfn0g04 xs1n0g01 xs2n0g01 xs4n0g01 xs7n0g01; do
+  echo Getting $FILE.png...
+  curl -sO http://www.schaik.com/pngsuite/$FILE.png
+done
