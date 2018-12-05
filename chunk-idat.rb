@@ -7,8 +7,11 @@ class PngChunkIDAT < PngChunk
     info[:IDAT][:compressed_size] = @data.length
     info[:IDAT][:uncompressed_size] = uncompressed_size
     info[:IDAT][:compression_ratio] = (@data.length.to_f / uncompressed_size.to_f).round(4)
+    info[:IDAT][:compression_level] = compression_level
+    info[:IDAT][:preset_dictionary_present] = has_preset_dictionary? ? "Yes" : "No"
     info[:IDAT][:zlib_header_checksum_ok] = zlib_header_checksum_ok? ? "Yes" : "No"
-    # TODO: finish implementing zlib header info extraction
+    # TODO: implement support for preset dictionaries
+    # TODO: check Adler32 data checksum
     info
   end
 
@@ -38,7 +41,24 @@ class PngChunkIDAT < PngChunk
     return 2 ** (((@data[0].ord & 0xF0) >> 4) + 8)
   end
 
+  def compression_level
+    case @data[1].ord & 0xC0 >> 6
+      when 0
+        :fastest
+      when 1
+        :fast
+      when 2
+        :default
+      when 3
+        :maximum_compression
+    end
+  end
+
   def zlib_header_checksum_ok?
     ((@data[0].ord * 256 + (@data[1].ord & 0x0F)) % 31) == 0
+  end
+
+  def has_preset_dictionary?
+    @data[1].ord & 0x20 > 0
   end
 end
