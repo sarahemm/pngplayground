@@ -8,6 +8,8 @@ class UI
     /help/ => :help,
     /show chunks/ => :show_chunks,
     /show chunk (\S+)/ => :show_chunk,
+    /validate chunks/ => :validate_chunks,
+    /validate chunk (\S+)/ => :validate_chunk,
     /extract (\S+) (\S+) ?(\S*)/ => :extract_chunk
   }
 
@@ -39,6 +41,7 @@ class UI
     puts "show chunks - List all chunks and high-level stats."
     puts "show chunk chunk_type - Show detailed info about a chunk."
     puts "extract chunk_type file [whole-chunk] - Extract one chunk into a separate file."
+    puts "validate chunk chunk_type - Validate a chunk."
   end
 
   def self.extract_chunk(pngfile, type, filename, extract_what)
@@ -77,6 +80,33 @@ class UI
         field_name = field.to_s.gsub("_", " ").capitalize
         puts "#{field_name}: #{value}"
       end
+    end
+  end
+
+  def self.validate_chunks(pngfile)
+    pngfile.chunks.each do |chunk|
+      chunk_errors = chunk.errors
+      if(chunk_errors == []) then
+        puts "#{chunk.type}: No errors"
+      else
+        chunk_errors.each do |error|
+          puts "#{chunk.type}: #{error}"
+        end
+      end
+    end
+  end
+
+  def self.validate_chunk(pngfile, type)
+    chunks = pngfile.chunk(type)
+    if(chunks.length == 0) then
+      puts "No #{type} chunks found."
+      return
+    end
+    chunk_errors = chunks[0].errors
+    if(chunk_errors == []) then
+      puts "#{type} chunk has no errors."
+    else
+      puts chunk_errors.join("\n")
     end
   end
 end

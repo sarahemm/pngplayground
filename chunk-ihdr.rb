@@ -12,6 +12,26 @@ class PngChunkIHDR < PngChunk
     info
   end
 
+  def errors
+    errors = super
+    errors.push "Invalid bit depth" if :bit_depth == :invalid
+    errors.push "Invalid colour type" if :colour_type == :invalid
+    errors.push "Invalid compression method" if :compression_method == :invalid
+    errors.push "Invalid filter method" if :filter_method == :invalid
+    errors.push "Invalid interlace method" if :interlace_method == :invalid
+    case colour_type
+      when :truecolour
+        errors.push "Truecolour type does not permit bit depth #{bit_depth}" if ![8, 16].include? bit_depth
+      when :indexed_colour
+        errors.push "Indexed colour type does not permit bit depth #{bit_depth}" if ![1, 2, 4, 8].include? bit_depth
+      when :greyscale_with_alpha
+        errors.push "Greyscale with alpha colour type does not permit bit depth #{bit_depth}" if ![8, 16].include? bit_depth
+      when :truecolour_with_alpha
+        errors.push "Truecolour with alpha colour type does not permit bit depth #{bit_depth}" if ![8, 16].include? bit_depth
+    end
+    errors
+  end
+
   def width
     @data[0..3].to_s.unpack("N")[0]
   end

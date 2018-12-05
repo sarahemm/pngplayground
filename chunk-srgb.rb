@@ -6,6 +6,12 @@ class PngChunkSRGB < PngChunk
     info
   end
 
+  def errors
+    errors = super
+    errors.push "Invalid rendering intent" if rendering_intent == :invalid
+    errors
+  end
+
   def rendering_intent
     case @data[0].to_i
       when 0

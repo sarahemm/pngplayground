@@ -27,6 +27,12 @@ class PngChunk
     info
   end
 
+  def errors
+    errors = Array.new
+    errors.push "Chunk has incorrect CRC" if !crc_ok?
+    errors
+  end
+
   def actual_crc
     Zlib::crc32 @type + @data
   end
