@@ -2,8 +2,9 @@
 
 require './helpers.rb'
 require './chunk.rb'
-require './chunk-ihdr.rb' # TODO: auto-load all chunk classes
-require './chunk-phys.rb' # TODO: auto-load all chunk classes
+Dir.glob("./chunk-????.rb").each do |chunkclass|
+  require chunkclass
+end
 require './pngformat.rb'
 require './ui.rb'
 
