@@ -70,7 +70,13 @@ class UI
       puts "No #{type} chunks found."
       return
     end
-    chunk = chunks[0]
-    print chunk.info
+    chunk_info = chunks[0].info
+    chunk_info.each do |category, fields|
+      puts "\n#{category == :generic ? "Generic" : category} Chunk Info"
+      fields.each do |field, value|
+        field_name = field.to_s.gsub("_", " ").capitalize
+        puts "#{field_name}: #{value}"
+      end
+    end
   end
 end

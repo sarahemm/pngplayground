@@ -1,15 +1,15 @@
 class PngChunkIHDR < PngChunk
   def info
-    info_str = super
-    info_str += "\nIHDR Chunk Info\n"
-    info_str += "Width: #{width}\n"
-    info_str += "Height: #{height}\n"
-    info_str += "Bit Depth: #{bit_depth}\n"
-    info_str += "Colour Type: #{colour_type}\n"
-    info_str += "Compression Method: #{compression_method}\n"
-    info_str += "Filter Method: #{filter_method}\n"
-    info_str += "Interlace Method: #{interlace_method}\n"
-    info_str
+    info = super
+    info[:IHDR] = Hash.new
+    info[:IHDR][:width] = width
+    info[:IHDR][:height] = height
+    info[:IHDR][:bit_depth] = bit_depth
+    info[:IHDR][:colour_type] = colour_type
+    info[:IHDR][:compression_method] = compression_method
+    info[:IHDR][:filter_method] = filter_method
+    info[:IHDR][:interlace_method] = interlace_method 
+    info
   end
 
   def width

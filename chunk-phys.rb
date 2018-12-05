@@ -1,11 +1,11 @@
 class PngChunkPHYS < PngChunk
   def info
-    info_str = super
-    info_str += "\npHYs Chunk Info\n"
-    info_str += "Pixels per Unit X: #{ppu_x}\n"
-    info_str += "Pixels per Unit Y: #{ppu_y}\n"
-    info_str += "Unit: #{unit}\n"
-    info_str
+    info = super
+    info[:pHYs] = Hash.new
+    info[:pHYs][:pixels_per_unit_x] = ppu_x
+    info[:pHYs][:pixels_per_unit_y] = ppu_y
+    info[:pHYs][:unit] = unit
+    info
   end
 
   def ppu_x
