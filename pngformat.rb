@@ -8,7 +8,7 @@ class PngFile
     puts "Reading header..."
     @chunks = Array.new
     print "Reading chunks: "
-    while(@chunks.push PngChunk.new(pngfile))
+    while(@chunks.push load_chunk(pngfile))
       this_chunk = @chunks[chunks.length-1]
       crc_bad_flag = ""
       crc_bad_flag = " (CRC bad)" if !this_chunk.crc_ok?
@@ -17,6 +17,20 @@ class PngFile
       break if this_chunk.type == "IEND"
     end
     puts "done."
+  end
+  
+  def load_chunk(pngfile)
+    # peek at what the type is so we know what subclass to instantiate
+    length = pngfile.read(4)
+    type = pngfile.read(4)
+    # put the file position back to the start of this block
+    pngfile.seek(-8, IO::SEEK_CUR)
+    begin
+      chunk_class = Object.const_get("PngChunk#{type.upcase}")
+      return chunk_class.new(pngfile)
+    rescue NameError
+      return PngChunk.new(pngfile)
+    end
   end
 
   def chunk(type)

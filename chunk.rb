@@ -11,16 +11,17 @@ class PngChunk
   end
 
   def info
-    info_str = ""
     flags = Array.new
     flags.push "Critical" if is_critical?
     flags.push is_public? ? "Public" : "Private"
     flags.push "Copy-safe" if is_copysafe?
+    info_str  = "Generic Chunk Info\n"
     info_str += "Type: #{@type}\n"
     info_str += "Size: #{@data.length}\n"
     info_str += "Flags: #{flags.join(", ")}\n"
     info_str += "Stored CRC: #{sprintf "0x%08X", @crc} (#{crc_ok? ? "OK" : "Bad"})\n"
     info_str += "Actual CRC: #{sprintf "0x%08X", actual_crc}\n"
+    info_str
   end
 
   def actual_crc
