@@ -1,7 +1,8 @@
 require 'zlib'
 
 class PngChunk
-  attr_reader :type, :data, :crc
+  attr_reader :type, :data
+  attr_accessor :crc
   
   def initialize(pngfile)
     length = pngfile.read(4).unpack("N")[0]

@@ -11,7 +11,8 @@ class UI
     /validate chunks/ => :validate_chunks,
     /validate chunk (\S+)/ => :validate_chunk,
     /extract (\S+) (\S+) ?(\S*)/ => :extract_chunk,
-    /set (\S+) (\S+) (\S+)/ => :set_field
+    /set (\S+) (\S+) (\S+)/ => :set_field,
+    /fix checksum (\S+)/ => :fix_checksum
   }
 
   def self.Launch(pngfile)
@@ -45,6 +46,7 @@ class UI
     puts "validate chunks - Validate all chunks."
     puts "validate chunk chunk_type - Validate a chunk."
     puts "set chunk_type field_name value - Set a field in a chunk."
+    puts "fix checksum chunk_type - Fix the checksum on a chunk."
   end
 
   def self.extract_chunk(pngfile, type, filename, extract_what)
@@ -120,5 +122,14 @@ class UI
       return
     end
     chunks[0].send "#{field.to_s}=", new_value
+  end
+  
+  def self.fix_checksum(pngfile, type)
+    chunks = pngfile.chunk(type)
+    if(chunks.length == 0) then
+      puts "No #{type} chunks found."
+      return
+    end
+    chunks[0].crc = chunks[0].actual_crc
   end
 end
