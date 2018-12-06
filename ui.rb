@@ -10,7 +10,8 @@ class UI
     /show chunk (\S+)/ => :show_chunk,
     /validate chunks/ => :validate_chunks,
     /validate chunk (\S+)/ => :validate_chunk,
-    /extract (\S+) (\S+) ?(\S*)/ => :extract_chunk
+    /extract (\S+) (\S+) ?(\S*)/ => :extract_chunk,
+    /set (\S+) (\S+) (\S+)/ => :set_field
   }
 
   def self.Launch(pngfile)
@@ -43,6 +44,7 @@ class UI
     puts "extract chunk_type file [whole-chunk] - Extract one chunk into a separate file."
     puts "validate chunks - Validate all chunks."
     puts "validate chunk chunk_type - Validate a chunk."
+    puts "set chunk_type field_name value - Set a field in a chunk."
   end
 
   def self.extract_chunk(pngfile, type, filename, extract_what)
@@ -109,5 +111,14 @@ class UI
     else
       puts chunk_errors.join("\n")
     end
+  end
+  
+  def self.set_field(pngfile, type, field, new_value)
+    chunks = pngfile.chunk(type)
+    if(chunks.length == 0) then
+      puts "No #{type} chunks found."
+      return
+    end
+    chunks[0].send "#{field.to_s}=", new_value
   end
 end

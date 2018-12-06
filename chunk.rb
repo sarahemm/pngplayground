@@ -54,7 +54,32 @@ class PngChunk
   end
   
   def method_missing(m, *args, &block)
-    field = fields[m]
+    if(m[-1] == "=") then
+      set_field m[0..-2].to_sym, args[0]
+    else
+      read_field m
+    end
+  end
+  
+  def set_field(field, new_value)
+    field = fields[field]
+    raise NameError, "No such field #{m}" if !fields.has_key? field
+    # TODO: permit fields with postprocs to be set
+    if(field[:postproc]) then
+      puts "Fields with post-processing lambdas are not yet settable."
+      return
+    end
+    # TODO: permit fields with other formats to be set
+    case field[:format]
+      when :int1
+        @data[field[:offset]] = new_value.to_i.chr
+      else
+        puts "Fields with format #{field[:format]} are not yet settable."
+    end
+  end
+
+  def read_field(field)
+    field = fields[field]
     raise NameError, "No such field #{m}" if !field
     field_data = @data[field[:offset]..field[:offset] + (field[:length]-1)]
     case field[:format]
