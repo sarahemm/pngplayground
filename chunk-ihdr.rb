@@ -1,4 +1,52 @@
 class PngChunkIHDR < PngChunk
+  @@fields = {
+    :width => {
+      :offset => 0, :length => 4,
+      :format => :int4
+    },
+    :height => {
+      :offset => 4, :length => 4,
+      :format => :int4
+    },
+    :bit_depth => {
+      :offset => 8, :length => 1,
+      :format => :int1
+    },
+    :colour_type => {
+      :offset => 9, :length => 1,
+      :format => :enum,
+      :enum => {
+        0 => :greyscale,
+        2 => :truecolour,
+        3 => :indexed_colour,
+        4 => :greyscale_with_alpha,
+        6 => :truecolour_with_alpha
+      }
+    },
+    :compression_method => {
+      :offset => 10, :length => 1,
+      :format => :enum,
+      :enum => {
+        0 => :deflate
+      }
+    },
+    :filter_method => {
+      :offset => 11, :length => 1,
+      :format => :enum,
+      :enum => {
+        0 => :adaptive
+      }
+    },
+    :interlace_method => {
+      :offset => 12, :length => 1,
+      :format => :enum,
+      :enum => {
+        0 => :none,
+        1 => :adam7
+      }
+    }
+  }
+
   def info
     info = super
     info[:IHDR] = Hash.new
@@ -30,61 +78,5 @@ class PngChunkIHDR < PngChunk
         errors.push "Truecolour with alpha colour type does not permit bit depth #{bit_depth}" if ![8, 16].include? bit_depth
     end
     errors
-  end
-
-  def width
-    @data[0..3].to_s.unpack("N")[0]
-  end
-  
-  def height
-    @data[4..7].to_s.unpack("N")[0]
-  end
-
-  def bit_depth
-    @data[8].to_i
-  end
-
-  def colour_type
-    case @data[9].to_i
-      when 0
-        :greyscale
-      when 2
-        :truecolour
-      when 3
-        :indexed_colour
-      when 4
-        :greyscale_with_alpha
-      when 6
-        :truecolour_with_alpha
-      else
-        :invalid
-    end
-  end
-
-  def compression_method
-    case @data[10].to_i
-      when 0
-        :deflate
-      else
-        :invalid
-    end
-  end
-
-  def filter_method
-    case @data[11].to_i
-      when 0
-        :adaptive_filtering
-      else
-        :invalid
-    end
-  end
-
-  def interlace_method
-    case @data[12].to_i
-      when 0
-        :none
-      1
-        :adam7
-    end
   end
 end

@@ -2,6 +2,8 @@ require 'zlib'
 
 class PngChunk
   attr_reader :type, :data, :crc
+  
+  @@fields = {}
 
   def initialize(pngfile)
     length = pngfile.read(4).unpack("N")[0]
@@ -52,5 +54,25 @@ class PngChunk
   def is_copysafe?
     @type[3].is_upper?
   end
+  
+  def method_missing(m, *args, &block)
+    field = @@fields[m]
+    throw NameError, "No such field #{m}" if !field
+    field_data = @data[field[:offset]..field[:offset] + (field[:length]-1)]
+    case field[:format]
+      when :int1
+        return field_data.ord.to_i
+      when :int4
+        return field_data.to_s.unpack("N")[0]
+      when :enum
+        if(field[:enum].has_key? field_data.ord.to_i) then
+          return field[:enum][field_data.ord.to_i]
+        else
+          return :invalid
+        end
+      else
+        throw NameError, "Invalid field format #{field[:format]}"
+    end
+    return 0
+  end
 end
-
