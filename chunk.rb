@@ -3,8 +3,6 @@ require 'zlib'
 class PngChunk
   attr_reader :type, :data, :crc
   
-  @@fields = {}
-
   def initialize(pngfile)
     length = pngfile.read(4).unpack("N")[0]
     @type = pngfile.read(4)
@@ -56,23 +54,25 @@ class PngChunk
   end
   
   def method_missing(m, *args, &block)
-    field = @@fields[m]
-    throw NameError, "No such field #{m}" if !field
+    field = fields[m]
+    raise NameError, "No such field #{m}" if !field
     field_data = @data[field[:offset]..field[:offset] + (field[:length]-1)]
     case field[:format]
       when :int1
-        return field_data.ord.to_i
+        out_data = field_data.ord.to_i
       when :int4
-        return field_data.to_s.unpack("N")[0]
+        out_data = field_data.to_s.unpack("N")[0]
       when :enum
         if(field[:enum].has_key? field_data.ord.to_i) then
-          return field[:enum][field_data.ord.to_i]
+          out_data = field[:enum][field_data.ord.to_i]
         else
-          return :invalid
+          out_data = :invalid
         end
       else
         throw NameError, "Invalid field format #{field[:format]}"
     end
-    return 0
+    return 0 if !out_data
+    out_data = field[:postproc].call(out_data) if field[:postproc]
+    out_data
   end
 end

@@ -1,51 +1,53 @@
 class PngChunkIHDR < PngChunk
-  @@fields = {
-    :width => {
-      :offset => 0, :length => 4,
-      :format => :int4
-    },
-    :height => {
-      :offset => 4, :length => 4,
-      :format => :int4
-    },
-    :bit_depth => {
-      :offset => 8, :length => 1,
-      :format => :int1
-    },
-    :colour_type => {
-      :offset => 9, :length => 1,
-      :format => :enum,
-      :enum => {
-        0 => :greyscale,
-        2 => :truecolour,
-        3 => :indexed_colour,
-        4 => :greyscale_with_alpha,
-        6 => :truecolour_with_alpha
-      }
-    },
-    :compression_method => {
-      :offset => 10, :length => 1,
-      :format => :enum,
-      :enum => {
-        0 => :deflate
-      }
-    },
-    :filter_method => {
-      :offset => 11, :length => 1,
-      :format => :enum,
-      :enum => {
-        0 => :adaptive
-      }
-    },
-    :interlace_method => {
-      :offset => 12, :length => 1,
-      :format => :enum,
-      :enum => {
-        0 => :none,
-        1 => :adam7
+  def fields
+    {
+      :width => {
+        :offset => 0, :length => 4,
+        :format => :int4
+      },
+      :height => {
+        :offset => 4, :length => 4,
+        :format => :int4
+      },
+      :bit_depth => {
+        :offset => 8, :length => 1,
+        :format => :int1
+      },
+      :colour_type => {
+        :offset => 9, :length => 1,
+        :format => :enum,
+        :enum => {
+          0 => :greyscale,
+          2 => :truecolour,
+          3 => :indexed_colour,
+          4 => :greyscale_with_alpha,
+          6 => :truecolour_with_alpha
+        }
+      },
+      :compression_method => {
+        :offset => 10, :length => 1,
+        :format => :enum,
+        :enum => {
+          0 => :deflate
+        }
+      },
+      :filter_method => {
+        :offset => 11, :length => 1,
+        :format => :enum,
+        :enum => {
+          0 => :adaptive
+        }
+      },
+      :interlace_method => {
+        :offset => 12, :length => 1,
+        :format => :enum,
+        :enum => {
+          0 => :none,
+          1 => :adam7
+        }
       }
     }
-  }
+  end
 
   def info
     info = super
