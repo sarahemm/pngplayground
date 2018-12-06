@@ -77,6 +77,8 @@ class PngChunk
     case field[:format]
       when :int1
         @data[field[:offset]] = new_value.to_i.chr
+      when :int4
+        @data[field[:offset]..field[:offset] + (field[:length]-1)] = [new_value.to_i].pack("N")
       else
         puts "Fields with format #{field[:format]} are not yet settable."
     end
