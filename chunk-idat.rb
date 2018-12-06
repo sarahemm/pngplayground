@@ -1,4 +1,43 @@
 class PngChunkIDAT < PngChunk
+  def fields
+    {
+      :compression_method => {
+        :offset => 0, :length => 1,
+        :format => :enum,
+        :preproc => lambda { |input| input & 0x0F },
+        :enum =>  {
+          8 => :deflate,
+          15 => :reserved
+        }
+      },
+      :window_size => {
+        :offset => 0, :length => 1,
+        :format => :int1,
+        :postproc => lambda { |input| 2 ** (((input & 0xF0) >> 4) + 8) }
+      },
+      :compression_level => {
+        :offset => 1, :length => 1,
+        :format => :enum,
+        :preproc => lambda { |input| input & 0xC0 >> 6 },
+        :enum => {
+          0 => :fastest,
+          1 => :fast,
+          2 => :default,
+          3 => :maximum_compression
+        }
+      },
+      :has_preset_dictionary? => {
+        :offset => 1, :length => 1,
+        :format => :int1,
+        :postproc => lambda { |input| input & 0x20 > 0 }
+      },
+      :stored_zlib_data_checksum => {
+        :offset => -4, :length => 4,
+        :format => :int4,
+      },
+    }
+  end
+
   def info
     info = super
     info[:IDAT] = Hash.new
@@ -38,34 +77,6 @@ class PngChunkIDAT < PngChunk
     uncompressed_data.length
   end
 
-  def compression_method
-    case @data[0].ord & 0x0F
-      when 8
-        :deflate
-      when 15
-        :reserved
-      else
-        :invalid
-    end
-  end
-
-  def window_size
-    return 2 ** (((@data[0].ord & 0xF0) >> 4) + 8)
-  end
-
-  def compression_level
-    case @data[1].ord & 0xC0 >> 6
-      when 0
-        :fastest
-      when 1
-        :fast
-      when 2
-        :default
-      when 3
-        :maximum_compression
-    end
-  end
-
   def zlib_header_checksum_ok?
     ((@data[0].ord * 256 + (@data[1].ord & 0x0F)) % 31) == 0
   end
@@ -76,13 +87,5 @@ class PngChunkIDAT < PngChunk
 
   def actual_zlib_data_checksum
     Zlib::adler32 uncompressed_data
-  end
-
-  def stored_zlib_data_checksum
-    @data[-4..-1].to_s.unpack("N")[0]
-  end
-
-  def has_preset_dictionary?
-    @data[1].ord & 0x20 > 0
   end
 end

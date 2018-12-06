@@ -63,8 +63,10 @@ class PngChunk
       when :int4
         out_data = field_data.to_s.unpack("N")[0]
       when :enum
-        if(field[:enum].has_key? field_data.ord.to_i) then
-          out_data = field[:enum][field_data.ord.to_i]
+        value = field_data.ord.to_i
+        value = field[:preproc].call(value) if field[:preproc]
+        if(field[:enum].has_key? value) then
+          out_data = field[:enum][value]
         else
           out_data = :invalid
         end
