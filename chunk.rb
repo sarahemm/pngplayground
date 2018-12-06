@@ -61,9 +61,12 @@ class PngChunk
     end
   end
   
-  def set_field(field, new_value)
-    field = fields[field]
-    raise NameError, "No such field #{m}" if !fields.has_key? field
+  def set_field(field_name, new_value)
+    field = fields[field_name]
+    if(!field) then
+      puts "No such field #{field_name}.\nAvailable fields: #{fields.keys.join(", ")}"
+      return
+    end
     # TODO: permit fields with postprocs to be set
     if(field[:postproc]) then
       puts "Fields with post-processing lambdas are not yet settable."
