@@ -41,6 +41,7 @@ class UI
     puts "show chunks - List all chunks and high-level stats."
     puts "show chunk chunk_type - Show detailed info about a chunk."
     puts "extract chunk_type file [whole-chunk] - Extract one chunk into a separate file."
+    puts "validate chunks - Validate all chunks."
     puts "validate chunk chunk_type - Validate a chunk."
   end
 
