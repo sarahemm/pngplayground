@@ -5,6 +5,7 @@ class PngChunkIDAT < PngChunk
         :offset => 0, :length => 1,
         :format => :enum,
         :preproc => lambda { |input| input & 0x0F },
+        :write_preproc => lambda { |old, new| (old & 0xF0) | new },
         :enum =>  {
           8 => :deflate,
           15 => :reserved
@@ -13,7 +14,8 @@ class PngChunkIDAT < PngChunk
       :window_size => {
         :offset => 0, :length => 1,
         :format => :int1,
-        :postproc => lambda { |input| 2 ** (((input & 0xF0) >> 4) + 8) }
+        :postproc => lambda { |input| 2 ** (((input & 0xF0) >> 4) + 8) },
+        :write_postproc => lambda { |old, new| (old & 0x0F) | ((Math::log2(new).to_i-8) << 4) }
       },
       :compression_level => {
         :offset => 1, :length => 1,
@@ -78,9 +80,20 @@ class PngChunkIDAT < PngChunk
   end
 
   def zlib_header_checksum_ok?
-    ((@data[0].ord * 256 + (@data[1].ord & 0x0F)) % 31) == 0
+    ((@data[0].ord * 256 + @data[1].ord) % 31) == 0
   end
   
+  def fix_checksum
+    # clear out the old (presumably bad) checksum
+    data[1] = (data[1].ord & 0xE0).chr
+    # calculate the new checksum
+    checksum = 31 - (@data[0].ord * 256 + @data[1].ord) % 31
+    # install the new checksum
+    data[1] = ((data[1].ord & 0xE0) | checksum).chr
+    # call our superclass's function to fix the chunk checksum
+    super
+  end
+
   def zlib_data_checksum_ok?
     actual_zlib_data_checksum == stored_zlib_data_checksum
   end

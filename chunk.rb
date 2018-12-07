@@ -72,17 +72,29 @@ class PngChunk
       puts "No such field #{field_name}.\nAvailable fields: #{fields.keys.join(", ")}"
       return
     end
-    # TODO: permit fields with postprocs to be set
-    if(field[:postproc]) then
-      puts "Fields with post-processing lambdas are not yet settable."
-      return
-    end
     # TODO: permit fields with other formats to be set
     case field[:format]
       when :int1
-        @data[field[:offset]] = new_value.to_i.chr
+        new_int = new_value.to_i
+        p new_int
+        new_int = field[:write_postproc].call(@data[field[:offset]].ord.to_i, new_int) if field[:write_postproc]
+        p new_int
+        @data[field[:offset]] = new_int.chr
       when :int4
+        # TODO: permit fields with postprocs to be set
+        if(field[:postproc]) then
+          puts "Int4 fields with post-processing lambdas are not yet settable."
+          return
+        end
         @data[field[:offset]..field[:offset] + (field[:length]-1)] = [new_value.to_i].pack("N")
+      when :enum
+        new_int = field[:enum].key(new_value.to_sym)
+        if(!new_int) then
+          puts "No such value #{new_value} for field.\nAvailable values: #{field[:enum].values.join(", ")}"
+          return
+        end
+        new_int = field[:write_preproc].call(@data[field[:offset]].ord.to_i, new_int) if field[:write_preproc]
+        @data[field[:offset]] = new_int.chr
       else
         puts "Fields with format #{field[:format]} are not yet settable."
     end
@@ -90,7 +102,7 @@ class PngChunk
 
   def read_field(field)
     field = fields[field]
-    raise NameError, "No such field #{m}" if !field
+    raise NameError, "No such field #{field}" if !field
     field_data = @data[field[:offset]..field[:offset] + (field[:length]-1)]
     case field[:format]
       when :int1
@@ -111,5 +123,11 @@ class PngChunk
     return 0 if !out_data
     out_data = field[:postproc].call(out_data) if field[:postproc]
     out_data
+  end
+
+  def fix_checksum
+    p @crc
+    p actual_crc
+    @crc = actual_crc
   end
 end

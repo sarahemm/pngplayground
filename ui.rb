@@ -132,7 +132,7 @@ class UI
       puts "No #{type} chunks found."
       return
     end
-    chunks[0].crc = chunks[0].actual_crc
+    chunks[0].fix_checksum
   end
 
   def self.write_file(pngfile, filename)
