@@ -33,6 +33,14 @@ class PngFile
     end
   end
 
+  def write_file(filename)
+    # TODO: check before overwriting existing files
+    outfile = File.open(filename, "w")
+    outfile.write @header.to_s
+    @chunks.each {|chunk| outfile.write chunk.to_s}
+    outfile.close
+  end
+
   def chunk(type)
     @chunks.select {|chunk| chunk.type == type}
   end
@@ -58,6 +66,10 @@ class PngFileHeader
     check(@dos_line_end, [0x0D, 0x0A], "DOS line ending")
     check(@dos_eof, 0x1A, "DOS EOF")
     check(@unix_line_end, 0x0A, "UNIX line ending")
+  end
+  
+  def to_s
+    [@high_bit_check, @sig, @dos_line_end[0], @dos_line_end[1], @dos_eof, @unix_line_end].pack("CA3CCCC")
   end
 end
 

@@ -12,7 +12,8 @@ class UI
     /validate chunk (\S+)/ => :validate_chunk,
     /extract (\S+) (\S+) ?(\S*)/ => :extract_chunk,
     /set (\S+) (\S+) (\S+)/ => :set_field,
-    /fix checksum (\S+)/ => :fix_checksum
+    /fix checksum (\S+)/ => :fix_checksum,
+    /write (\S+)/ => :write_file
   }
 
   def self.Launch(pngfile)
@@ -47,6 +48,7 @@ class UI
     puts "validate chunk chunk_type - Validate a chunk."
     puts "set chunk_type field_name value - Set a field in a chunk."
     puts "fix checksum chunk_type - Fix the checksum on a chunk."
+    puts "write filename - Write the PNG to a file."
   end
 
   def self.extract_chunk(pngfile, type, filename, extract_what)
@@ -131,5 +133,9 @@ class UI
       return
     end
     chunks[0].crc = chunks[0].actual_crc
+  end
+
+  def self.write_file(pngfile, filename)
+    pngfile.write_file filename
   end
 end

@@ -34,6 +34,10 @@ class PngChunk
     errors
   end
 
+  def to_s
+    [@data.length, @type, @data, @crc].pack("NA4A#{@data.length}N")
+  end
+
   def actual_crc
     Zlib::crc32 @type + @data
   end
